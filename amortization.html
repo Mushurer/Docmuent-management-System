@@ -1,0 +1,656 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Loan Amortization Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --surface: #ffffff;
+            --background: #f8fafc;
+        }
+
+        body {
+            background: var(--background);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .amortization-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .amortization-table th,
+        .amortization-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .amortization-table th {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .amortization-table tbody tr:hover {
+            background: #f3f4f6;
+        }
+
+        .fee-section {
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .fee-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .fee-item:last-child {
+            border-bottom: none;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .table-container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen p-4">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-calculator"></i> Advanced Loan Amortization Calculator
+            </h1>
+            <p class="text-lg text-gray-600">Professional loan calculation with comprehensive fee management</p>
+            <div class="mt-4">
+                <a href="/" class="btn btn-primary no-print">
+                    <i class="fas fa-home"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto">
+            <!-- Main Input Form -->
+            <div class="card p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-6 text-gray-800">
+                    <i class="fas fa-cog"></i> Loan Parameters
+                </h2>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Basic Loan Information -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700">Basic Information</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Client Name</label>
+                                <input type="text" id="clientName" class="form-control" placeholder="Enter client name">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Loan Amount</label>
+                                <input type="number" id="loanAmount" class="form-control" placeholder="Enter loan amount" step="0.01" onchange="calculateAutomaticFees()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Annual Interest Rate (%)</label>
+                                <input type="number" id="interestRate" class="form-control" placeholder="Enter interest rate" step="0.01">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Loan Term (Months)</label>
+                                <input type="number" id="loanTerm" class="form-control" placeholder="Enter loan term" min="1">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                                <input type="date" id="startDate" class="form-control">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Payment Frequency</label>
+                                <select id="paymentFrequency" class="form-control">
+                                    <option value="monthly">Monthly</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="biweekly">Bi-weekly</option>
+                                    <option value="quarterly">Quarterly</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Capitalized Fees (One-time) -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700">Capitalized Fees (One-time)</h3>
+                        <div class="fee-section">
+                            <div class="fee-item">
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="inceptionFee" checked>
+                                    <label for="inceptionFee">Inception Fee</label>
+                                </div>
+                                <input type="number" id="inceptionFeeAmount" class="form-control w-24" placeholder="0.00" step="0.01">
+                            </div>
+                            <div class="fee-item">
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="flaggingFee" checked>
+                                    <label for="flaggingFee">Flagging Fee</label>
+                                </div>
+                                <input type="number" id="flaggingFeeAmount" class="form-control w-24" placeholder="0.00" step="0.01">
+                            </div>
+                            <div class="fee-item">
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="initiationFee" checked>
+                                    <label for="initiationFee">Initiation Fee</label>
+                                </div>
+                                <input type="number" id="initiationFeeAmount" class="form-control w-24" placeholder="0.00" step="0.01">
+                            </div>
+                            <div class="fee-item">
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="transferFee" checked>
+                                    <label for="transferFee">Transfer Fee</label>
+                                </div>
+                                <input type="number" id="transferFeeAmount" class="form-control w-24" placeholder="0.00" step="0.01">
+                            </div>
+                            <div class="fee-item">
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="insuranceFee" checked>
+                                    <label for="insuranceFee">Insurance</label>
+                                </div>
+                                <input type="number" id="insuranceFeeAmount" class="form-control w-24" placeholder="0.00" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cyclic Fees (Recurring) -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700">Cyclic Fees (Recurring)</h3>
+                        <div class="fee-section">
+                            <div class="fee-item">
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="serviceFee" checked>
+                                    <label for="serviceFee">Service Fee</label>
+                                </div>
+                                <input type="number" id="serviceFeeAmount" class="form-control w-24" placeholder="0.00" step="0.01">
+                            </div>
+                            <div class="fee-item">
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="creditLife" checked>
+                                    <label for="creditLife">Credit Life</label>
+                                </div>
+                                <input type="number" id="creditLifeAmount" class="form-control w-24" placeholder="0.00" step="0.01">
+                            </div>
+                        </div>
+
+                        <!-- Advanced Settings -->
+                        <div class="mt-6">
+                            <h4 class="text-md font-semibold mb-3 text-gray-700">Advanced Settings</h4>
+                            <div class="space-y-3">
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="affectCurrentMonth">
+                                    <label for="affectCurrentMonth">Affect Current Month Payments on Rate Change</label>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Calculation Method</label>
+                                    <select id="calculationMethod" class="form-control">
+                                        <option value="standard">Standard Amortization Formula</option>
+                                        <option value="simple">Simple Interest</option>
+                                        <option value="compound">Compound Interest</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-8 flex gap-4 justify-center no-print">
+                    <button onclick="calculateAmortization()" class="btn btn-primary">
+                        <i class="fas fa-calculator"></i> Calculate Schedule
+                    </button>
+                    <button onclick="clearForm()" class="btn btn-warning">
+                        <i class="fas fa-eraser"></i> Clear Form
+                    </button>
+                    <button onclick="saveCalculation()" class="btn btn-success">
+                        <i class="fas fa-save"></i> Save Calculation
+                    </button>
+                    <button onclick="printSchedule()" class="btn btn-primary">
+                        <i class="fas fa-print"></i> Print Schedule
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loan Summary -->
+            <div id="loanSummary" class="summary-card hidden">
+                <h3 class="text-xl font-semibold mb-4">
+                    <i class="fas fa-chart-line"></i> Loan Summary
+                </h3>
+                <div class="grid md:grid-cols-5 gap-4">
+                    <div class="summary-item">
+                        <span>Opening Balance:</span>
+                        <span id="totalLoanAmount" class="font-bold">$0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Amount Received:</span>
+                        <span id="clientReceivedAmount" class="font-bold">$0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Monthly Payment:</span>
+                        <span id="monthlyPayment" class="font-bold">$0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total Interest:</span>
+                        <span id="totalInterest" class="font-bold">$0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total Amount:</span>
+                        <span id="totalAmount" class="font-bold">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amortization Schedule Table -->
+            <div id="scheduleContainer" class="hidden">
+                <div class="card p-6">
+                    <h2 class="text-2xl font-semibold mb-6 text-gray-800">
+                        <i class="fas fa-table"></i> Amortization Schedule
+                    </h2>
+                    
+                    <div class="table-container">
+                        <table class="amortization-table">
+                            <thead>
+                                <tr>
+                                    <th>Payment #</th>
+                                    <th>Date</th>
+                                    <th>Beginning Balance</th>
+                                    <th>Payment</th>
+                                    <th>Principal</th>
+                                    <th>Interest</th>
+                                    <th>Service Fee</th>
+                                    <th>Credit Life</th>
+                                    <th>Ending Balance</th>
+                                    <th>Cumulative Interest</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateAutomaticFees() {
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
+            
+            if (loanAmount > 0) {
+                // Calculate fees based on loan amount (rates based on your example)
+                // For 1000 over 24 months: initiation 8.16, insurance 5.44, transfer 2.72
+                const initiationRate = 8.16 / 1000; // 0.816%
+                const insuranceRate = 5.44 / 1000;  // 0.544%
+                const transferRate = 2.72 / 1000;   // 0.272%
+                
+                const initiationFee = loanAmount * initiationRate;
+                const insuranceFee = loanAmount * insuranceRate;
+                const transferFee = loanAmount * transferRate;
+                
+                // Update fee inputs
+                document.getElementById('initiationFeeAmount').value = initiationFee.toFixed(2);
+                document.getElementById('insuranceFeeAmount').value = insuranceFee.toFixed(2);
+                document.getElementById('transferFeeAmount').value = transferFee.toFixed(2);
+            }
+        }
+
+        function calculateAmortization() {
+            // Get form values
+            const clientName = document.getElementById('clientName').value.trim();
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
+            const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
+            const loanTerm = parseInt(document.getElementById('loanTerm').value) || 0;
+            const startDate = document.getElementById('startDate').value;
+            const paymentFrequency = document.getElementById('paymentFrequency').value;
+
+            // Validate inputs
+            if (!clientName || loanAmount <= 0 || interestRate < 0 || loanTerm <= 0 || !startDate) {
+                alert('Please fill in all required fields with valid values.');
+                return;
+            }
+
+            // Get fees
+            const fees = {
+                inception: document.getElementById('inceptionFee').checked ? (parseFloat(document.getElementById('inceptionFeeAmount').value) || 0) : 0,
+                flagging: document.getElementById('flaggingFee').checked ? (parseFloat(document.getElementById('flaggingFeeAmount').value) || 0) : 0,
+                initiation: document.getElementById('initiationFee').checked ? (parseFloat(document.getElementById('initiationFeeAmount').value) || 0) : 0,
+                transfer: document.getElementById('transferFee').checked ? (parseFloat(document.getElementById('transferFeeAmount').value) || 0) : 0,
+                insurance: document.getElementById('insuranceFee').checked ? (parseFloat(document.getElementById('insuranceFeeAmount').value) || 0) : 0,
+                service: document.getElementById('serviceFee').checked ? (parseFloat(document.getElementById('serviceFeeAmount').value) || 0) : 0,
+                creditLife: document.getElementById('creditLife').checked ? (parseFloat(document.getElementById('creditLifeAmount').value) || 0) : 0
+            };
+
+            // Calculate total capitalized fees
+            const totalCapitalizedFees = fees.inception + fees.flagging + fees.initiation + fees.transfer + fees.insurance;
+            
+            // Opening balance is always the loan amount applied
+            const openingBalance = loanAmount;
+            
+            // Amount received by client is loan amount minus capitalized fees
+            const clientReceivedAmount = loanAmount - totalCapitalizedFees;
+
+            // Calculate payment frequency factor
+            let paymentsPerYear = 12;
+            switch (paymentFrequency) {
+                case 'weekly': paymentsPerYear = 52; break;
+                case 'biweekly': paymentsPerYear = 26; break;
+                case 'quarterly': paymentsPerYear = 4; break;
+                default: paymentsPerYear = 12; break;
+            }
+
+            // Calculate monthly interest rate
+            const monthlyRate = interestRate / 100 / paymentsPerYear;
+            const totalPayments = loanTerm * (paymentsPerYear / 12);
+
+            // Calculate payment using standard amortization formula
+            let payment = 0;
+            if (monthlyRate > 0) {
+                payment = openingBalance * (monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) / (Math.pow(1 + monthlyRate, totalPayments) - 1);
+            } else {
+                payment = openingBalance / totalPayments;
+            }
+
+            // Add recurring fees to payment
+            const totalRecurringFees = fees.service + fees.creditLife;
+            const totalPayment = payment + totalRecurringFees;
+
+            // Generate amortization schedule
+            const schedule = [];
+            let balance = openingBalance;
+            let cumulativeInterest = 0;
+            const applicationDate = new Date(startDate);
+            
+            // Calculate first payment date (always 25th of next month)
+            const firstPaymentDate = new Date(applicationDate);
+            firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 1);
+            firstPaymentDate.setDate(25);
+
+            for (let i = 1; i <= totalPayments; i++) {
+                // Calculate payment date (always 25th of each month for monthly payments)
+                let paymentDate = new Date(firstPaymentDate);
+                if (paymentFrequency === 'monthly') {
+                    paymentDate.setMonth(paymentDate.getMonth() + (i - 1));
+                    paymentDate.setDate(25);
+                } else if (paymentFrequency === 'weekly') {
+                    paymentDate.setDate(paymentDate.getDate() + (i - 1) * 7);
+                } else if (paymentFrequency === 'biweekly') {
+                    paymentDate.setDate(paymentDate.getDate() + (i - 1) * 14);
+                } else if (paymentFrequency === 'quarterly') {
+                    paymentDate.setMonth(paymentDate.getMonth() + (i - 1) * 3);
+                    paymentDate.setDate(25);
+                }
+
+                // Calculate days for interest calculation
+                let daysForInterest;
+                let previousDate;
+                
+                if (i === 1) {
+                    // First payment: calculate from application date to first payment date
+                    daysForInterest = Math.ceil((paymentDate - applicationDate) / (1000 * 60 * 60 * 24));
+                    previousDate = applicationDate;
+                } else {
+                    // Subsequent payments: calculate from previous payment date
+                    previousDate = new Date(firstPaymentDate);
+                    if (paymentFrequency === 'monthly') {
+                        previousDate.setMonth(previousDate.getMonth() + (i - 2));
+                        previousDate.setDate(25);
+                    } else if (paymentFrequency === 'weekly') {
+                        previousDate.setDate(previousDate.getDate() + (i - 2) * 7);
+                    } else if (paymentFrequency === 'biweekly') {
+                        previousDate.setDate(previousDate.getDate() + (i - 2) * 14);
+                    } else if (paymentFrequency === 'quarterly') {
+                        previousDate.setMonth(previousDate.getMonth() + (i - 2) * 3);
+                        previousDate.setDate(25);
+                    }
+                    daysForInterest = Math.ceil((paymentDate - previousDate) / (1000 * 60 * 60 * 24));
+                }
+
+                // Calculate interest based on actual days
+                const dailyRate = (interestRate / 100) / 365;
+                const interestPayment = balance * dailyRate * daysForInterest;
+                const principalPayment = Math.max(0, payment - interestPayment);
+                
+                if (principalPayment <= 0) {
+                    alert('Warning: Payment amount is less than interest. Loan will not be paid off.');
+                    break;
+                }
+                
+                balance -= principalPayment;
+                cumulativeInterest += interestPayment;
+
+                schedule.push({
+                    paymentNumber: i,
+                    date: paymentDate.toLocaleDateString(),
+                    beginningBalance: balance + principalPayment,
+                    payment: totalPayment,
+                    principal: principalPayment,
+                    interest: interestPayment,
+                    serviceFee: fees.service,
+                    creditLife: fees.creditLife,
+                    endingBalance: Math.max(0, balance),
+                    cumulativeInterest: cumulativeInterest
+                });
+
+                if (balance <= 0) break;
+            }
+
+            // Update summary
+            document.getElementById('totalLoanAmount').textContent = `$${openingBalance.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('clientReceivedAmount').textContent = `$${clientReceivedAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('monthlyPayment').textContent = `$${totalPayment.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('totalInterest').textContent = `$${cumulativeInterest.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('totalAmount').textContent = `$${(openingBalance + cumulativeInterest + (totalRecurringFees * totalPayments)).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+
+            // Display schedule table
+            displaySchedule(schedule);
+
+            // Show results
+            document.getElementById('loanSummary').classList.remove('hidden');
+            document.getElementById('scheduleContainer').classList.remove('hidden');
+        }
+
+        function displaySchedule(schedule) {
+            const tbody = document.getElementById('scheduleTableBody');
+            tbody.innerHTML = '';
+
+            schedule.forEach(payment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${payment.paymentNumber}</td>
+                    <td>${payment.date}</td>
+                    <td>$${payment.beginningBalance.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>$${payment.payment.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>$${payment.principal.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>$${payment.interest.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>$${payment.serviceFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>$${payment.creditLife.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>$${payment.endingBalance.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td>$${payment.cumulativeInterest.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function clearForm() {
+            if (confirm('Are you sure you want to clear all form data?')) {
+                document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"]').forEach(input => {
+                    input.value = '';
+                });
+                document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+                document.getElementById('paymentFrequency').value = 'monthly';
+                document.getElementById('calculationMethod').value = 'standard';
+                document.getElementById('loanSummary').classList.add('hidden');
+                document.getElementById('scheduleContainer').classList.add('hidden');
+            }
+        }
+
+        function saveCalculation() {
+            const clientName = document.getElementById('clientName').value.trim();
+            if (!clientName) {
+                alert('Please enter a client name before saving.');
+                return;
+            }
+
+            const calculationData = {
+                clientName: clientName,
+                loanAmount: document.getElementById('loanAmount').value,
+                interestRate: document.getElementById('interestRate').value,
+                loanTerm: document.getElementById('loanTerm').value,
+                startDate: document.getElementById('startDate').value,
+                paymentFrequency: document.getElementById('paymentFrequency').value,
+                fees: {
+                    inception: document.getElementById('inceptionFee').checked,
+                    inceptionAmount: document.getElementById('inceptionFeeAmount').value,
+                    flagging: document.getElementById('flaggingFee').checked,
+                    flaggingAmount: document.getElementById('flaggingFeeAmount').value,
+                    initiation: document.getElementById('initiationFee').checked,
+                    initiationAmount: document.getElementById('initiationFeeAmount').value,
+                    transfer: document.getElementById('transferFee').checked,
+                    transferAmount: document.getElementById('transferFeeAmount').value,
+                    insurance: document.getElementById('insuranceFee').checked,
+                    insuranceAmount: document.getElementById('insuranceFeeAmount').value,
+                    service: document.getElementById('serviceFee').checked,
+                    serviceAmount: document.getElementById('serviceFeeAmount').value,
+                    creditLife: document.getElementById('creditLife').checked,
+                    creditLifeAmount: document.getElementById('creditLifeAmount').value
+                },
+                timestamp: new Date().toISOString()
+            };
+
+            // Save to localStorage
+            const savedCalculations = JSON.parse(localStorage.getItem('amortizationCalculations') || '[]');
+            savedCalculations.push(calculationData);
+            localStorage.setItem('amortizationCalculations', JSON.stringify(savedCalculations));
+
+            alert('Calculation saved successfully!');
+        }
+
+        function printSchedule() {
+            window.print();
+        }
+
+        // Set default start date to today
+        document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
+    </script>
+</body>
+</html>

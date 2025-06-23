@@ -1,0 +1,1374 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Balance Calculator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #dbeafe;
+            --secondary: #64748b;
+            --accent: #10b981;
+            --accent-dark: #059669;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --rounded: 0.75rem;
+            --rounded-lg: 1rem;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--surface);
+            border-radius: var(--rounded-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></svg>') repeat;
+            background-size: 20px 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            margin: 0.5rem 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .form-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--rounded);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0 0 1.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--rounded);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: var(--surface);
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .form-group input:invalid {
+            border-color: var(--danger);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: var(--rounded);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-success {
+            background: var(--accent);
+        }
+
+        .btn-success:hover {
+            background: var(--accent-dark);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .calculator-widget {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--rounded);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            width: 280px;
+        }
+
+        .calculator-widget h4 {
+            margin: 0 0 1rem 0;
+            text-align: center;
+            color: var(--text);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .calculator-widget input {
+            width: 100%;
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--rounded);
+            transition: border-color 0.2s ease;
+        }
+
+        .calculator-widget input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .calculator-hint {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .repayments-tab {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 2px solid var(--border);
+            border-radius: var(--rounded);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .repayments-tab h3 {
+            margin-top: 0;
+            color: var(--text);
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .summary-card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: var(--rounded);
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .summary-card h4 {
+            margin: 0 0 1rem 0;
+            color: var(--text);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .summary-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--rounded);
+            font-size: 0.9rem;
+        }
+
+        .summary-value {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        .balance-display {
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 1rem;
+            border-radius: var(--rounded);
+            text-align: center;
+        }
+
+        .balance-positive {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary-light);
+        }
+
+        .balance-negative {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--surface);
+            border-radius: var(--rounded);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-top: 2rem;
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .data-table tr:hover {
+            background: var(--primary-light);
+        }
+
+        .transaction-row {
+            background: rgba(16, 185, 129, 0.1) !important;
+            font-weight: 600;
+        }
+
+        .repayment-input {
+            width: 120px;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--rounded);
+            font-size: 0.9rem;
+            text-align: right;
+            transition: border-color 0.2s ease;
+        }
+
+        .repayment-input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .calculation-info {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--primary-light);
+            border-radius: var(--rounded);
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: var(--rounded-lg);
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            min-width: 400px;
+            border: 1px solid var(--border);
+        }
+
+        .modal h3 {
+            margin-top: 0;
+            color: var(--text);
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .action-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--rounded);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-button:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .status-complete {
+            background: var(--accent);
+        }
+
+        .status-pending {
+            background: var(--warning);
+        }
+
+        .status-empty {
+            background: var(--danger);
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .content {
+                padding: 1rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .calculator-widget {
+                position: relative;
+                width: 100%;
+                margin-bottom: 2rem;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .data-table {
+                font-size: 0.8rem;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 0.5rem;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text);
+            color: white;
+            padding: 0.5rem;
+            border-radius: var(--rounded);
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Enhanced Header -->
+        <div class="header">
+            <h1><i class="fas fa-calculator"></i> Loan Balance Calculator</h1>
+            <p>Professional loan management and calculation system</p>
+        </div>
+
+        <!-- Calculator Widget -->
+        <div class="calculator-widget">
+            <h4><i class="fas fa-calculator"></i> Quick Calculator</h4>
+            <input type="text" id="calcDisplay" placeholder="Type expression and press Enter...">
+            <div class="calculator-hint">
+                <i class="fas fa-info-circle"></i> Press Enter to calculate • Esc to clear
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Client Information Section -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <i class="fas fa-user"></i> Client Information
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="client_name"><i class="fas fa-user"></i> Client Name</label>
+                        <input type="text" id="client_name" placeholder="Enter client name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="initial_balance"><i class="fas fa-dollar-sign"></i> Initial Balance</label>
+                        <input type="number" id="initial_balance" placeholder="0.00" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="interest_rate" class="tooltip" data-tooltip="Annual interest rate percentage">
+                            <i class="fas fa-percentage"></i> Interest Rate (% per annum)
+                        </label>
+                        <input type="number" id="interest_rate" value="120" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="service_fee"><i class="fas fa-coins"></i> Service Fee</label>
+                        <input type="number" id="service_fee" placeholder="0.00" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="start_date"><i class="fas fa-calendar"></i> Start Date</label>
+                        <input type="date" id="start_date" required>
+                    </div>
+                </div>
+                
+                <div class="btn-group" style="margin-top: 2rem;">
+                    <button class="btn" onclick="calculateLoan(false)">
+                        <i class="fas fa-calculator"></i> Calculate
+                    </button>
+                    <button class="btn btn-warning" id="repaymentsTabBtn" onclick="toggleRepaymentsTab()">
+                        <i class="fas fa-chart-line"></i> Show Repayments Summary
+                    </button>
+                </div>
+            </div>
+
+            <!-- Repayments Summary Tab -->
+            <div id="repaymentsTab" class="repayments-tab" style="display: none;">
+                <h3><i class="fas fa-chart-pie"></i> Repayments Summary</h3>
+                
+                <!-- Total Collectable Section -->
+                <div class="summary-card">
+                    <h4><i class="fas fa-money-bill-wave"></i> Total Collectable</h4>
+                    <div class="summary-grid">
+                        <div>
+                            <label>Installment Amount:</label>
+                            <input type="number" id="installmentAmount" class="summary-input" placeholder="0.00" onchange="calculateTotalCollectable()">
+                        </div>
+                        <div>
+                            <label>Payment Period:</label>
+                            <input type="number" id="periodCount" class="summary-input" placeholder="0" onchange="calculateTotalCollectable()">
+                        </div>
+                        <div>
+                            <label>Total Collectable:</label>
+                            <div class="summary-value">$<span id="totalCollectable">0.00</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Repayments Section -->
+                <div class="summary-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h4><i class="fas fa-hand-holding-usd"></i> Total Repayments</h4>
+                        <button class="btn btn-secondary" onclick="toggleRepaymentsTab()">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
+                        <input type="number" id="additionalRepayment" class="summary-input" placeholder="Add amount" style="flex: 1; min-width: 120px;">
+                        <button class="btn btn-success" onclick="addToTotalRepayments()">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetAdditionalRepayments()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                    <div class="summary-value" style="font-size: 1.2rem; margin-bottom: 1rem;">
+                        Total Repayments: $<span id="totalRepayments">0.00</span>
+                    </div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">
+                        <div><strong>Monthly breakdown:</strong> <span id="monthlyBreakdown">No repayments entered</span></div>
+                        <div id="additionalRepaymentsDisplay" style="margin-top: 0.5rem;"></div>
+                    </div>
+                </div>
+
+                <!-- Balance Section -->
+                <div class="summary-card">
+                    <h4><i class="fas fa-balance-scale"></i> Balance Summary</h4>
+                    <div id="balanceDisplay" class="balance-display"></div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="calculateLoan(true)">
+                    <i class="fas fa-download"></i> Download Excel
+                </button>
+                <button class="btn btn-warning" onclick="calculateProjection()">
+                    <i class="fas fa-chart-line"></i> Calculate Projection
+                </button>
+                <button class="btn" onclick="printTable()">
+                    <i class="fas fa-print"></i> Print Report
+                </button>
+            </div>
+
+            <!-- Data Table -->
+            <table class="data-table" id="balanceTable">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-calendar"></i> Month End Date</th>
+                        <th><i class="fas fa-folder-open"></i> Opening Balance</th>
+                        <th><i class="fas fa-percentage"></i> Interest</th>
+                        <th><i class="fas fa-coins"></i> Service Fee</th>
+                        <th>
+                            <i class="fas fa-hand-holding-usd"></i> Repayment 
+                            <button class="action-button" onclick="addRepaymentColumn()" title="Add repayment column">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </th>
+                        <th><i class="fas fa-wallet"></i> Closing Balance</th>
+                        <th><i class="fas fa-cog"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr class="{{ 'transaction-row' if transaction.is_direct_deposit or transaction.is_mid_month_transaction }}">
+                        <td>
+                            <span class="status-indicator {{ 'status-complete' if not transaction.is_direct_deposit and not transaction.is_mid_month_transaction else 'status-pending' }}"></span>
+                            {{ transaction.end_date }}{{ ' (Transaction)' if transaction.is_direct_deposit or transaction.is_mid_month_transaction }}
+                        </td>
+                        <td>${{ "%.2f"|format(transaction.opening_balance) }}</td>
+                        <td>${{ "%.2f"|format(transaction.interest) }}</td>
+                        <td>${{ "%.2f"|format(transaction.service_fee) }}</td>
+                        <td>
+                            <input type="number" class="repayment-input" value="{{ "%.2f"|format(transaction.repayment) }}"
+                                onchange="updateRepayment({{ loop.index0 }}, this.value)"
+                                style="{{ 'font-weight: bold; color: var(--primary);' if transaction.is_direct_deposit or transaction.is_mid_month_transaction }}">
+                        </td>
+                        <td>${{ "%.2f"|format(transaction.closing_balance) }}</td>
+                        <td>
+                            {% if not transaction.is_direct_deposit and not transaction.is_mid_month_transaction %}
+                            <button class="action-button" onclick="showMidMonthModal({{ loop.index0 }})" title="Add mid-month transaction">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Calculation Info -->
+            <div class="calculation-info" id="calculationInfo">
+                <i class="fas fa-info-circle"></i> Enter client details and click Calculate to generate loan schedule
+            </div>
+        </div>
+    </div>
+
+    <!-- Mid Month Transaction Modal -->
+    <div id="midMonthModal" class="modal" style="display: none;">
+        <h3><i class="fas fa-plus-circle"></i> Add Mid-Month Transaction</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="midMonth_date"><i class="fas fa-calendar"></i> Transaction Date</label>
+                <input type="date" id="midMonth_date">
+            </div>
+            <div class="form-group">
+                <label for="midMonth_amount"><i class="fas fa-dollar-sign"></i> Amount</label>
+                <input type="number" id="midMonth_amount" step="0.01" placeholder="0.00">
+            </div>
+            <div class="form-group">
+                <label for="midMonth_service_fee"><i class="fas fa-coins"></i> Service Fee</label>
+                <input type="number" id="midMonth_service_fee" value="0" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="midMonth_interest_rate"><i class="fas fa-percentage"></i> Interest Rate (%)</label>
+                <input type="number" id="midMonth_interest_rate" step="0.01">
+            </div>
+        </div>
+        <div class="btn-group" style="margin-top: 1.5rem;">
+            <button class="btn btn-success" onclick="addMidMonthTransaction()">
+                <i class="fas fa-plus"></i> Add Transaction
+            </button>
+            <button class="btn btn-secondary" onclick="closeMidMonthModal()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="modal" style="display: none;">
+        <h3><i class="fas fa-money-check"></i> Add Direct Deposit</h3>
+        <div class="form-group">
+            <label for="deposit_date"><i class="fas fa-calendar"></i> Deposit Date</label>
+            <input type="date" id="deposit_date">
+        </div>
+        <div class="form-group">
+            <label for="deposit_amount"><i class="fas fa-dollar-sign"></i> Deposit Amount</label>
+            <input type="number" id="deposit_amount" step="0.01" placeholder="0.00">
+        </div>
+        <div class="btn-group" style="margin-top: 1.5rem;">
+            <button class="btn btn-success" onclick="addDirectDeposit()">
+                <i class="fas fa-plus"></i> Add Deposit
+            </button>
+            <button class="btn btn-secondary" onclick="closeDirectDepositModal()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+        </div>
+    </div>
+
+    <script>
+let savedRepayments = new Array(12).fill(0);
+let selectedMonthIndex = null;
+let transactionMemory = [];
+let additionalRepayments = [];
+
+// Store table data
+function storeTableData() {
+    const tbody = document.querySelector('#balanceTable tbody');
+    transactionMemory = Array.from(tbody.rows).map(row => ({
+        date: row.cells[0].textContent.split(' (')[0],
+        opening_balance: parseFloat(row.cells[1].textContent.replace('$', '')),
+        interest: parseFloat(row.cells[2].textContent.replace('$', '')),
+        service_fee: parseFloat(row.cells[3].textContent.replace('$', '')),
+        repayment: parseFloat(row.cells[4].querySelector('input').value),
+        closing_balance: parseFloat(row.cells[5].textContent.replace('$', '')),
+        is_transaction: row.className.includes('transaction-row')
+    }));
+}
+
+// Calculate loan with enhanced loading state
+function calculateLoan(download = false) {
+    const btn = download ? document.querySelector('.btn-success') : document.querySelector('.btn');
+    const originalText = btn.innerHTML;
+    
+    // Show loading state
+    btn.innerHTML = download ? '<div class="loading"></div> Generating...' : '<div class="loading"></div> Calculating...';
+    btn.disabled = true;
+
+    // Validate required fields
+    const clientName = document.getElementById('client_name').value.trim();
+    const initialBalance = document.getElementById('initial_balance').value.trim();
+    const interestRate = document.getElementById('interest_rate').value.trim();
+    const serviceFee = document.getElementById('service_fee').value.trim();
+    const startDate = document.getElementById('start_date').value.trim();
+    
+    if (!clientName) {
+        showAlert('Please enter a client name', 'warning');
+        resetButton(btn, originalText);
+        return;
+    }
+    if (!initialBalance) {
+        showAlert('Please enter an initial balance', 'warning');
+        resetButton(btn, originalText);
+        return;
+    }
+    if (!interestRate) {
+        showAlert('Please enter an interest rate', 'warning');
+        resetButton(btn, originalText);
+        return;
+    }
+    if (!serviceFee) {
+        showAlert('Please enter a service fee', 'warning');
+        resetButton(btn, originalText);
+        return;
+    }
+    if (!startDate) {
+        showAlert('Please select a start date', 'warning');
+        resetButton(btn, originalText);
+        return;
+    }
+
+    const data = {
+        download: download,
+        client_name: clientName,
+        initial_balance: initialBalance,
+        interest_rate: interestRate,
+        service_fee: serviceFee,
+        start_date: startDate,
+        repayments: savedRepayments
+    };
+
+    fetch('/calculate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (download) {
+            return response.blob().then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `loan_schedule_${document.getElementById('client_name').value}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                showAlert('Excel file downloaded successfully!', 'success');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!download) {
+            updateTable(data);
+            showAlert('Calculation completed successfully!', 'success');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred during calculation', 'error');
+    })
+    .finally(() => {
+        resetButton(btn, originalText);
+    });
+}
+
+function resetButton(btn, originalText) {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+}
+
+function showAlert(message, type = 'info') {
+    // Create alert element
+    const alert = document.createElement('div');
+    alert.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 1rem 2rem;
+        border-radius: var(--rounded);
+        z-index: 9999;
+        box-shadow: var(--shadow-lg);
+        font-weight: 500;
+        animation: slideDown 0.3s ease;
+    `;
+    
+    switch(type) {
+        case 'success':
+            alert.style.background = 'var(--accent)';
+            alert.style.color = 'white';
+            alert.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            break;
+        case 'warning':
+            alert.style.background = 'var(--warning)';
+            alert.style.color = 'white';
+            alert.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+            break;
+        case 'error':
+            alert.style.background = 'var(--danger)';
+            alert.style.color = 'white';
+            alert.innerHTML = `<i class="fas fa-times-circle"></i> ${message}`;
+            break;
+        default:
+            alert.style.background = 'var(--primary)';
+            alert.style.color = 'white';
+            alert.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+    }
+    
+    document.body.appendChild(alert);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        alert.style.animation = 'slideUp 0.3s ease';
+        setTimeout(() => alert.remove(), 300);
+    }, 3000);
+}
+
+// Add CSS for animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideDown {
+        from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+        to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+    @keyframes slideUp {
+        from { transform: translateX(-50%) translateY(0); opacity: 1; }
+        to { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+function updateRepayment(monthIndex, value) {
+    const numValue = parseFloat(value) || 0;
+    savedRepayments[monthIndex] = numValue;
+    calculateLoan();
+    
+    // Update repayments total if tab is visible
+    const tab = document.getElementById('repaymentsTab');
+    if (tab.style.display === 'block') {
+        updateRepaymentsTotal();
+    }
+}
+
+function calculateProjection() {
+    const lastRow = document.querySelector('#balanceTable tbody tr:last-child');
+    if (!lastRow) {
+        showAlert('Please calculate the loan first', 'warning');
+        return;
+    }
+
+    const currentBalance = parseFloat(lastRow.cells[5].textContent.replace('$', ''));
+    const lastRepayment = parseFloat(lastRow.cells[4].querySelector('input').value) || 0;
+
+    fetch('/calculate_projection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            current_balance: currentBalance,
+            monthly_repayment: lastRepayment,
+            interest_rate: document.getElementById('interest_rate').value,
+            service_fee: document.getElementById('service_fee').value
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('calculationInfo').innerHTML += `<br><strong><i class="fas fa-chart-line"></i> ${data.projection}</strong>`;
+        showAlert('Projection calculated successfully!', 'success');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error calculating projection', 'error');
+    });
+}
+
+function showDirectDepositModal() {
+    document.getElementById('depositModal').style.display = 'block';
+}
+
+function closeDirectDepositModal() {
+    document.getElementById('depositModal').style.display = 'none';
+}
+
+function addDirectDeposit() {
+    const data = {
+        deposit_date: document.getElementById('deposit_date').value,
+        deposit_amount: document.getElementById('deposit_amount').value,
+        client_name: document.getElementById('client_name').value,
+        initial_balance: document.getElementById('initial_balance').value,
+        interest_rate: document.getElementById('interest_rate').value,
+        service_fee: document.getElementById('service_fee').value,
+        start_date: document.getElementById('start_date').value,
+        repayments: savedRepayments,
+        is_direct_deposit: true
+    };
+
+    fetch('/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        closeDirectDepositModal();
+        updateTable(data);
+        showAlert('Direct deposit added successfully!', 'success');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error adding direct deposit', 'error');
+    });
+}
+
+function updateTable(data) {
+    const tbody = document.getElementById('balanceTable').querySelector('tbody');
+    tbody.innerHTML = '';
+
+    data.months.forEach((month, index) => {
+        const row = document.createElement('tr');
+        const isTransaction = month.is_direct_deposit || month.is_mid_month_transaction;
+        row.className = isTransaction ? 'transaction-row' : '';
+        
+        const statusClass = isTransaction ? 'status-pending' : 'status-complete';
+        row.innerHTML = `
+            <td>
+                <span class="status-indicator ${statusClass}"></span>
+                ${month.end_date}${isTransaction ? ' (Transaction)' : ''}
+            </td>
+            <td>$${month.opening_balance.toFixed(2)}</td>
+            <td>$${month.interest.toFixed(2)}</td>
+            <td>$${month.service_fee.toFixed(2)}</td>
+            <td><input type="number" class="repayment-input" value="${month.repayment.toFixed(2)}" onchange="updateRepayment(${index}, this.value)"
+                style="${isTransaction ? 'font-weight: bold; color: var(--primary);' : ''}"></td>
+            <td>$${month.closing_balance.toFixed(2)}</td>
+            <td>${!isTransaction ? `<button class="action-button" onclick="showMidMonthModal(${index})" title="Add mid-month transaction"><i class="fas fa-plus"></i></button>` : ''}</td>
+        `;
+        
+        if (month.refund_message) {
+            row.style.background = 'rgba(16, 185, 129, 0.2)';
+            row.title = month.refund_message;
+        }
+        tbody.appendChild(row);
+    });
+
+    document.getElementById('calculationInfo').innerHTML =
+        `<i class="fas fa-user"></i> Calculated for <strong>${data.client_name}</strong> on <strong>${data.calculated_at}</strong><br>
+        <i class="fas fa-chart-line"></i> <strong>Projection: ${data.projection}</strong>`;
+}
+
+function addRepaymentColumn() {
+    showAlert('Multiple repayment columns feature will be implemented soon', 'info');
+}
+
+// Calculator functions
+document.addEventListener('DOMContentLoaded', function() {
+    const calcDisplay = document.getElementById('calcDisplay');
+    
+    calcDisplay.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            calculateResult();
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            clearCalc();
+        }
+    });
+    
+    // Allow only valid calculator characters
+    calcDisplay.addEventListener('input', function(event) {
+        const validChars = /^[0-9+\-*/.() ]*$/;
+        if (!validChars.test(event.target.value)) {
+            event.target.value = event.target.value.replace(/[^0-9+\-*/.() ]/g, '');
+        }
+    });
+});
+
+function clearCalc() {
+    document.getElementById('calcDisplay').value = '';
+}
+
+function calculateResult() {
+    const display = document.getElementById('calcDisplay');
+    try {
+        let expression = display.value.trim();
+        if (!expression) return;
+        
+        expression = expression.replace(/×/g, '*').replace(/÷/g, '/');
+        
+        if (!/^[0-9+\-*/.() ]+$/.test(expression)) {
+            throw new Error('Invalid characters');
+        }
+        
+        const result = eval(expression);
+        if (isNaN(result) || !isFinite(result)) {
+            throw new Error('Invalid result');
+        }
+        
+        display.value = result;
+    } catch (error) {
+        display.value = 'Error';
+        display.style.color = 'var(--danger)';
+        setTimeout(() => {
+            clearCalc();
+            display.style.color = '';
+        }, 1500);
+    }
+}
+
+// Repayments tab functions
+function toggleRepaymentsTab() {
+    const tab = document.getElementById('repaymentsTab');
+    const btn = document.getElementById('repaymentsTabBtn');
+    
+    if (tab.style.display === 'none') {
+        updateRepaymentsTotal();
+        tab.style.display = 'block';
+        btn.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Repayments Summary';
+    } else {
+        tab.style.display = 'none';
+        btn.innerHTML = '<i class="fas fa-chart-line"></i> Show Repayments Summary';
+    }
+}
+
+function updateRepaymentsTotal() {
+    const monthlyTotal = savedRepayments.reduce((sum, payment) => sum + payment, 0);
+    const additionalTotal = additionalRepayments.reduce((sum, payment) => sum + payment, 0);
+    const total = monthlyTotal + additionalTotal;
+    
+    document.getElementById('totalRepayments').textContent = total.toFixed(2);
+    
+    const breakdown = savedRepayments.map((payment, index) => 
+        payment > 0 ? `Month ${index + 1}: $${payment.toFixed(2)}` : ''
+    ).filter(item => item !== '').join(', ');
+    
+    document.getElementById('monthlyBreakdown').textContent = breakdown || 'No repayments entered';
+    
+    // Update additional repayments display
+    const additionalDisplay = document.getElementById('additionalRepaymentsDisplay');
+    if (additionalRepayments.length > 0) {
+        const additionalText = additionalRepayments.map((amount, index) => 
+            `Additional ${index + 1}: $${amount.toFixed(2)}`
+        ).join(', ');
+        additionalDisplay.innerHTML = `<strong>Additional payments:</strong> ${additionalText} (Total: $${additionalTotal.toFixed(2)})`;
+    } else {
+        additionalDisplay.innerHTML = '';
+    }
+    
+    updateBalance();
+}
+
+function calculateTotalCollectable() {
+    const installment = parseFloat(document.getElementById('installmentAmount').value) || 0;
+    const period = parseFloat(document.getElementById('periodCount').value) || 0;
+    const totalCollectable = installment * period;
+    
+    document.getElementById('totalCollectable').textContent = totalCollectable.toFixed(2);
+    updateBalance();
+}
+
+function addToTotalRepayments() {
+    const additionalAmount = parseFloat(document.getElementById('additionalRepayment').value);
+    
+    if (!isNaN(additionalAmount) && additionalAmount > 0) {
+        additionalRepayments.push(additionalAmount);
+        document.getElementById('additionalRepayment').value = '';
+        updateRepaymentsTotal();
+        showAlert('Additional repayment added successfully!', 'success');
+    } else {
+        showAlert('Please enter a valid amount', 'warning');
+    }
+}
+
+function resetAdditionalRepayments() {
+    additionalRepayments = [];
+    updateRepaymentsTotal();
+    showAlert('Additional repayments reset', 'info');
+}
+
+function updateBalance() {
+    const totalCollectable = parseFloat(document.getElementById('totalCollectable').textContent) || 0;
+    const totalRepayments = parseFloat(document.getElementById('totalRepayments').textContent) || 0;
+    const balance = totalCollectable - totalRepayments;
+    
+    const balanceDisplay = document.getElementById('balanceDisplay');
+    
+    if (balance < 0) {
+        balanceDisplay.innerHTML = `<i class="fas fa-money-bill-wave"></i> Client has a refund of $${Math.abs(balance).toFixed(2)}`;
+        balanceDisplay.className = 'balance-display balance-negative';
+    } else {
+        balanceDisplay.innerHTML = `<i class="fas fa-wallet"></i> Outstanding Balance: $${balance.toFixed(2)}`;
+        balanceDisplay.className = 'balance-display balance-positive';
+    }
+}
+
+function printTable() {
+    const printWindow = window.open('', '_blank');
+    const table = document.getElementById('balanceTable').cloneNode(true);
+    const info = document.getElementById('calculationInfo').cloneNode(true);
+
+    // Get totals from the repayments tab
+    const totalCollectable = parseFloat(document.getElementById('totalCollectable').textContent) || 0;
+    const totalRepayments = parseFloat(document.getElementById('totalRepayments').textContent) || 0;
+    const balance = totalCollectable - totalRepayments;
+
+    const balanceText = balance < 0 
+        ? `Client has a refund of $${Math.abs(balance).toFixed(2)}`
+        : `Outstanding Balance: $${balance.toFixed(2)}`;
+
+    const summarySection = `
+        <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #e9ecef;">
+            <h3 style="margin: 0 0 8px 0; color: #495057; text-align: center; font-size: 1.1em;"><i class="fas fa-chart-pie"></i> Payment Summary</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 8px 0;">
+                <div style="text-align: center;">
+                    <h4 style="margin: 0; color: #007bff; font-size: 0.9em;">Total Collectable</h4>
+                    <p style="font-size: 1.1em; font-weight: bold; color: #007bff; margin: 2px 0;">$${totalCollectable.toFixed(2)}</p>
+                </div>
+                <div style="text-align: center;">
+                    <h4 style="margin: 0; color: #28a745; font-size: 0.9em;">Total Repayments</h4>
+                    <p style="font-size: 1.1em; font-weight: bold; color: #28a745; margin: 2px 0;">$${totalRepayments.toFixed(2)}</p>
+                </div>
+                <div style="text-align: center;">
+                    <h4 style="margin: 0; color: ${balance < 0 ? '#155724' : '#004085'}; font-size: 0.9em;">Balance</h4>
+                    <p style="font-size: 1.1em; font-weight: bold; color: ${balance < 0 ? '#155724' : '#004085'}; margin: 2px 0;">$${Math.abs(balance).toFixed(2)}</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const style = `
+        <style>
+            @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 15px; font-size: 0.9em; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            th, td { padding: 6px 4px; text-align: center; border: 1px solid #ddd; font-size: 0.85em; }
+            th { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; font-weight: 600; }
+            th:nth-child(5), td:nth-child(5) { width: 80px; } /* Repayment column */
+            th:nth-child(7), td:nth-child(7) { width: 60px; } /* Actions column */
+            tr:nth-child(even) { background: #f8f9fa; }
+            tr:hover { background: #e3f2fd; }
+            .calculation-info { margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px; text-align: center; font-size: 0.9em; }
+            @media print {
+                button { display: none !important; }
+                input { border: none !important; background: transparent !important; }
+                .action-button { display: none !important; }
+                body { margin: 10px; font-size: 0.8em; }
+                th, td { padding: 4px 2px; font-size: 0.8em; }
+            }
+        </style>
+    `;
+
+    printWindow.document.write(`
+        <html>
+            <head>
+                ${style}
+                <title>Loan Balance Statement</title>
+            </head>
+            <body>
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1><i class="fas fa-calculator"></i> Loan Balance Statement</h1>
+                    <p style="color: #666; font-size: 1.1em;">Professional Loan Calculation Report</p>
+                </div>
+                ${summarySection}
+                ${table.outerHTML}
+                ${info.outerHTML}
+                <div style="margin-top: 30px; text-align: center; color: #666; font-size: 0.9em;">
+                    <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+                </div>
+            </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.print();
+}
+
+function showMidMonthModal(monthIndex) {
+    document.getElementById('midMonthModal').style.display = 'block';
+    selectedMonthIndex = monthIndex;
+}
+
+function closeMidMonthModal() {
+    document.getElementById('midMonthModal').style.display = 'none';
+}
+
+function validateTransactionDate(transactionDate, selectedRow, nextRow) {
+    const tDate = new Date(transactionDate);
+    const selectedDate = new Date(selectedRow.cells[0].textContent);
+    const nextDate = nextRow ? new Date(nextRow.cells[0].textContent) : null;
+
+    if (tDate <= selectedDate) {
+        showAlert('Transaction date must be after the selected row date', 'warning');
+        return false;
+    }
+    if (nextDate && tDate >= nextDate) {
+        showAlert('Transaction date must be before the next row date', 'warning');
+        return false;
+    }
+    return true;
+}
+
+function addMidMonthTransaction() {
+    const transactionDate = document.getElementById('midMonth_date').value;
+
+    storeTableData();
+
+    const rows = document.querySelector('#balanceTable tbody').rows;
+    const selectedRow = rows[selectedMonthIndex];
+    const nextRow = rows[selectedMonthIndex + 1];
+
+    if (!validateTransactionDate(transactionDate, selectedRow, nextRow)) {
+        return;
+    }
+
+    const data = {
+        midMonth_date: transactionDate,
+        midMonth_amount: document.getElementById('midMonth_amount').value,
+        midMonth_service_fee: document.getElementById('midMonth_service_fee').value,
+        midMonth_interest_rate: document.getElementById('midMonth_interest_rate').value || document.getElementById('interest_rate').value,
+        client_name: document.getElementById('client_name').value,
+        initial_balance: document.getElementById('initial_balance').value,
+        interest_rate: document.getElementById('interest_rate').value,
+        service_fee: document.getElementById('service_fee').value,
+        start_date: document.getElementById('start_date').value,
+        repayments: savedRepayments,
+        month_index: selectedMonthIndex,
+        is_mid_month_transaction: true
+    };
+
+    fetch('/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        closeMidMonthModal();
+        updateTable(data);
+        showAlert('Mid-month transaction added successfully!', 'success');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error adding mid-month transaction', 'error');
+    });
+}
+
+function calculateTodayBalance(endDate, closingBalance) {
+    const today = new Date();
+    const endOfMonth = new Date(endDate);
+    const year = endOfMonth.getFullYear();
+    const month = endOfMonth.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const dayOfMonth = today.getDate();
+
+    const balance = closingBalance * (daysInMonth / dayOfMonth);
+    return '$' + balance.toFixed(2);
+}
+</script>
+</body>
+</html>

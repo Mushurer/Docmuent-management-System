@@ -1,0 +1,932 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KYC Document Organizer</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-size: cover;
+      background-position: center;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #333;
+      padding: 1rem;
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.98);
+      padding: 2.5rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 10px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 1000px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .form-group {
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .form-group:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.75rem;
+      color: #374151;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    input[type="file"],
+    input[type="text"] {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      border: 2px solid #d1d5db;
+      border-radius: 0.75rem;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+      transition: all 0.3s ease-in-out;
+      font-size: 1rem;
+      background-color: #f9fafb;
+    }
+
+    input[type="file"]:focus,
+    input[type="text"]:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+      outline: none;
+      background-color: white;
+    }
+
+    input[type="file"]::file-selector-button {
+      font-weight: 600;
+      border: 0;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      margin-right: 1rem;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+    }
+    input[type="file"]::file-selector-button:hover {
+      background: linear-gradient(135deg, #4338ca, #6d28d9);
+      transform: translateY(-1px);
+    }
+
+    button, .button-link {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      text-align: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button:hover, .button-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    button:active, .button-link:active {
+      transform: translateY(0px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+    .btn-success:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+    }
+    .btn-warning:hover {
+      background: linear-gradient(135deg, #d97706, #b45309);
+    }
+
+    .btn-info {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: white;
+    }
+    .btn-info:hover {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+    }
+
+    #progress-bar-container {
+      background-color: #e5e7eb;
+      border-radius: 9999px;
+      padding: 3px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+    #progress-bar {
+      background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+      transition: width 0.5s ease-in-out;
+      border-radius: 9999px;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      position: relative;
+      margin: 5% auto;
+      background-color: white;
+      padding: 3rem;
+      border-radius: 1rem;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+      width: 90%;
+      max-width: 800px;
+    }
+
+    .close-button {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 2rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: #6b7280;
+      padding: 0.5rem;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+    .close-button:hover {
+      color: #1f2937;
+      background-color: #f3f4f6;
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .status-empty {
+      background-color: #fef2f2;
+      color: #dc2626;
+    }
+    .status-complete {
+      background-color: #f0fdf4;
+      color: #16a34a;
+    }
+
+    .card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e5e7eb;
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 3px solid #f3f4f6;
+      border-radius: 50%;
+      border-top-color: #3b82f6;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .developer-credit {
+      position: fixed;
+      bottom: 1rem;
+      left: 1rem;
+      color: #9ca3af;
+      font-size: 0.75rem;
+      background-color: rgba(255,255,255,0.8);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      backdrop-filter: blur(5px);
+    }
+
+    /* Dark Mode Styles */
+    .dark-mode {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e2e8f0;
+    }
+
+    .dark-mode .container {
+      background-color: rgba(30, 41, 59, 0.95);
+      border: 1px solid rgba(71, 85, 105, 0.3);
+    }
+
+    .dark-mode input[type="file"],
+    .dark-mode input[type="text"] {
+      background-color: #1e293b;
+      border-color: #475569;
+      color: #e2e8f0;
+    }
+
+    .dark-mode input[type="file"]:focus,
+    .dark-mode input[type="text"]:focus {
+      background-color: #334155;
+      border-color: #3b82f6;
+    }
+
+    .dark-mode .card {
+      background: #334155;
+      border-color: #475569;
+    }
+
+    .dark-mode .modal-content {
+      background-color: #1e293b;
+      color: #e2e8f0;
+    }
+
+    .dark-mode label {
+      color: #cbd5e1;
+    }
+
+    .dark-mode .close-button {
+      color: #94a3b8;
+    }
+
+    .dark-mode .close-button:hover {
+      color: #f1f5f9;
+      background-color: #475569;
+    }
+
+    .dark-mode .status-empty {
+      background-color: #7f1d1d;
+      color: #fca5a5;
+    }
+
+    .dark-mode .status-complete {
+      background-color: #14532d;
+      color: #86efac;
+    }
+
+    .dark-mode .developer-credit {
+      background-color: rgba(30, 41, 59, 0.8);
+      color: #94a3b8;
+    }
+
+    .dark-mode-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      color: #374151;
+      font-size: 1.5rem;
+    }
+
+    .dark-mode .dark-mode-toggle {
+      background: rgba(30, 41, 59, 0.8);
+      color: #fbbf24;
+      border-color: rgba(251, 191, 36, 0.3);
+    }
+
+    .dark-mode-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+    🌙
+  </div>
+
+  <div class="container">
+    <header class="mb-8 text-center">
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">KYC Document Organizer</h1>
+      <p class="text-lg text-gray-600">Streamline your document management process with advanced automation</p>
+    </header>
+
+    <div class="mb-6 text-center">
+      <button id="instructions-button" class="btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+        </svg>
+        View Instructions
+      </button>
+    </div>
+
+    <div id="upload-section" class="form-group">
+      <h2 class="text-2xl font-semibold mb-4 text-gray-700">📁 Step 1: Upload Excel File</h2>
+      <div class="card">
+        <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
+          <label for="excel-file">Choose Excel File with Client Data:</label>
+          <input type="file" id="excel-file" name="file" accept=".xlsx, .xls" required>
+          <button type="submit" class="btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+            Upload Excel File
+          </button>
+        </form>
+        <div id="upload-loading" style="display: none;" class="mt-4 text-center">
+          <div class="loading-spinner"></div>
+          <span class="ml-2">Uploading and creating folders...</span>
+        </div>
+        <div id="upload-message" style="display: none;" class="mt-4"></div>
+      </div>
+    </div>
+
+    <div id="search-section" class="form-group">
+      <h2 class="text-2xl font-semibold mb-4 text-gray-700">🔍 Step 2: Search & Organize Documents</h2>
+      <div class="card">
+        <form id="document-search-form" method="POST" action="/search-docs">
+          <label for="directory">Directory to Search for Documents:</label>
+          <input type="text" id="directory" name="directory" placeholder="e.g., C:\Documents\KYC_Files or /home/user/documents" required>
+          <div class="flex items-center mb-4">
+            <input type="checkbox" id="disable-exclusions" name="disable_exclusions" class="mr-3 w-4 h-4">
+            <label for="disable-exclusions" class="text-sm">Disable document name exclusions (include all files)</label>
+          </div>
+          <button type="submit" class="btn-success">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            Start Document Organization
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div id="progress-section" class="form-group" style="display: none;">
+      <h2 class="text-xl font-semibold mb-3 text-gray-700">⚡ Processing Documents</h2>
+      <div class="card">
+        <div id="progress-bar-container" class="mb-4">
+          <div id="progress-bar" style="width: 0%">0%</div>
+        </div>
+        <div id="progress-text" class="text-center text-gray-600">Preparing document search...</div>
+      </div>
+    </div>
+
+    <div id="results-section" class="form-group" style="display: none;">
+      <h2 class="text-xl font-semibold mb-3 text-gray-700">📊 Search Results</h2>
+      <div id="results" class="card mb-4"></div>
+
+      <div id="summary-section" style="display: none;">
+        <h3 class="text-lg font-semibold mb-3 text-gray-700">Client Processing Summary</h3>
+        <div class="card overflow-x-auto">
+          <table id="client-summary-table" class="min-w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client Name</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">EC Number</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Files Found</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Documents</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+              </tr>
+            </thead>
+            <tbody id="summary-table-body" class="bg-white divide-y divide-gray-200">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="empty-folders-section" class="form-group" style="display: none;">
+      <h2 class="text-xl font-semibold mb-3 text-gray-700">📂 Handle Empty Folders</h2>
+      <div class="card">
+        <div id="empty-folders-list" class="mb-4"></div>
+        <div id="manual-search-section" style="display: none;">
+          <h4 class="font-semibold mb-2">Manual Search for: <span id="selected-folder-name" class="text-blue-600"></span></h4>
+          <label for="manual-search-path">Specify additional search directory:</label>
+          <input type="text" id="manual-search-path" placeholder="Enter folder path to search for documents">
+          <div class="flex gap-2 mt-2">
+            <button onclick="performManualSearch()" class="btn-warning">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+              </svg>
+              Search Manually
+            </button>
+            <button onclick="hideManualSearch()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t-2 border-gray-200">
+      <div class="grid md:grid-cols-2 gap-4">
+        <a href="/download-zip" class="button-link btn-info">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+          Download All Documents (ZIP)
+        </a>
+        <a href="/download-excel" class="button-link btn-success">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 001 1h6a1 1 0 001-1V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+          </svg>
+          Download Summary Report (Excel)
+        </a>
+      </div>
+    </div>
+
+    <div class="developer-credit">
+      💻 Developer: Martin Mushure
+    </div>
+
+    <div id="instructions-modal" class="modal">
+      <div class="modal-content">
+        <button class="close-button" id="close-instructions-button">&times;</button>
+        <h2 class="text-2xl font-bold mb-4">📖 How to Use KYC Document Organizer</h2>
+        
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-lg font-semibold text-blue-600 mb-2">📋 Excel File Requirements</h3>
+            <p class="text-gray-700 mb-2">Your Excel file must contain:</p>
+            <ul class="list-disc list-inside text-gray-600 space-y-1">
+              <li><strong>Column 1:</strong> EC Number (e.g., 123456)</li>
+              <li><strong>Column 2:</strong> Client Name (e.g., John Doe)</li>
+            </ul>
+            <p class="text-sm text-gray-500 mt-2">Folders will be created as "[Name] [EC Number]"</p>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-semibold text-green-600 mb-2">🚀 Step-by-Step Process</h3>
+            <ol class="list-decimal list-inside text-gray-600 space-y-2">
+              <li>Upload your Excel file using the file selector</li>
+              <li>Enter the full path to your source documents directory</li>
+              <li>Click "Start Document Organization" to begin processing</li>
+              <li>Monitor progress and review results</li>
+              <li>Handle any empty folders using manual search if needed</li>
+              <li>Download organized files or generate reports</li>
+            </ol>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-semibold text-purple-600 mb-2">✨ Features</h3>
+            <ul class="list-disc list-inside text-gray-600 space-y-1">
+              <li>Automated folder creation based on Excel data</li>
+              <li>Smart document matching by name and EC number</li>
+              <li>Duplicate detection and prevention</li>
+              <li>Manual search for edge cases</li>
+              <li>Progress tracking with real-time updates</li>
+              <li>Export options (ZIP download, Excel reports)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedFolderForManualSearch = null;
+
+    // Dark mode functionality
+    function toggleDarkMode() {
+      const body = document.body;
+      const toggle = document.querySelector('.dark-mode-toggle');
+      
+      body.classList.toggle('dark-mode');
+      
+      if (body.classList.contains('dark-mode')) {
+        toggle.innerHTML = '☀️';
+        localStorage.setItem('darkMode', 'enabled');
+      } else {
+        toggle.innerHTML = '🌙';
+        localStorage.setItem('darkMode', 'disabled');
+      }
+    }
+
+    // Load dark mode preference on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const darkMode = localStorage.getItem('darkMode');
+      const toggle = document.querySelector('.dark-mode-toggle');
+      
+      if (darkMode === 'enabled') {
+        document.body.classList.add('dark-mode');
+        toggle.innerHTML = '☀️';
+      }
+    });
+
+    // Modal functionality
+    document.getElementById('instructions-button').addEventListener('click', function() {
+      document.getElementById('instructions-modal').style.display = 'block';
+    });
+
+    document.getElementById('close-instructions-button').addEventListener('click', function() {
+      document.getElementById('instructions-modal').style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('instructions-modal');
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+
+    // Upload form handler
+    document.getElementById('upload-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const fileInput = document.getElementById('excel-file');
+      if (!fileInput.files.length) {
+        alert('Please select an Excel file first.');
+        return;
+      }
+
+      const formData = new FormData(this);
+      const loadingDiv = document.getElementById('upload-loading');
+      const messageDiv = document.getElementById('upload-message');
+      const submitButton = this.querySelector('button[type="submit"]');
+
+      // Show loading state
+      loadingDiv.style.display = 'block';
+      messageDiv.style.display = 'none';
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<div class="loading-spinner mr-2"></div>Processing...';
+
+      fetch('/upload', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.text())
+      .then(data => {
+        loadingDiv.style.display = 'none';
+        messageDiv.textContent = data;
+        messageDiv.className = 'mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg';
+        messageDiv.style.display = 'block';
+        
+        // Reset button
+        submitButton.disabled = false;
+        submitButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+          Upload Excel File
+        `;
+      })
+      .catch(error => {
+        loadingDiv.style.display = 'none';
+        messageDiv.textContent = 'Error uploading file: ' + error.message;
+        messageDiv.className = 'mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg';
+        messageDiv.style.display = 'block';
+        
+        // Reset button
+        submitButton.disabled = false;
+        submitButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+          Upload Excel File
+        `;
+      });
+    });
+
+    // Document search form handler
+    document.getElementById('document-search-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const directory = document.getElementById('directory').value.trim();
+      if (!directory) {
+        alert('Please enter a directory path to search.');
+        return;
+      }
+
+      const disableExclusions = document.getElementById('disable-exclusions').checked;
+      const data = {
+        directory: directory,
+        disable_exclusions: disableExclusions
+      };
+
+      const progressSection = document.getElementById('progress-section');
+      const progressBar = document.getElementById('progress-bar');
+      const progressText = document.getElementById('progress-text');
+      const resultsSection = document.getElementById('results-section');
+      const resultsDiv = document.getElementById('results');
+      const summarySection = document.getElementById('summary-section');
+      const submitButton = this.querySelector('button[type="submit"]');
+
+      // Show progress section
+      progressSection.style.display = 'block';
+      resultsSection.style.display = 'none';
+      submitButton.disabled = true;
+
+      // Animate progress bar
+      let progress = 0;
+      progressText.textContent = 'Initializing document search...';
+      const progressInterval = setInterval(() => {
+        progress += Math.random() * 15 + 5;
+        if (progress > 90) progress = 90;
+        progressBar.style.width = progress + '%';
+        progressBar.textContent = Math.round(progress) + '%';
+        
+        if (progress < 30) {
+          progressText.textContent = 'Scanning directories...';
+        } else if (progress < 60) {
+          progressText.textContent = 'Matching documents...';
+        } else if (progress < 90) {
+          progressText.textContent = 'Organizing files...';
+        }
+      }, 300);
+
+      fetch('/search-docs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(data => {
+        clearInterval(progressInterval);
+        progressBar.style.width = '100%';
+        progressBar.textContent = '100%';
+        progressText.textContent = 'Processing complete!';
+
+        setTimeout(() => {
+          progressSection.style.display = 'none';
+          resultsSection.style.display = 'block';
+          submitButton.disabled = false;
+
+          if (data.error) {
+            resultsDiv.innerHTML = `
+              <div class="flex items-center">
+                <svg class="h-6 w-6 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                </svg>
+                <span class="font-semibold">Error:</span>
+              </div>
+              <p class="mt-2">${data.message}</p>
+            `;
+            resultsDiv.className = 'bg-red-50 border border-red-200 rounded-lg p-4 text-red-800';
+          } else {
+            resultsDiv.innerHTML = `
+              <div class="flex items-center mb-4">
+                <svg class="h-6 w-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <h3 class="font-semibold text-lg">Document Organization Complete!</h3>
+              </div>
+              <div class="grid md:grid-cols-3 gap-4 text-center">
+                <div class="bg-blue-50 p-3 rounded-lg">
+                  <div class="text-2xl font-bold text-blue-600">${data.folders_created}</div>
+                  <div class="text-sm text-blue-600">Folders Processed</div>
+                </div>
+                <div class="bg-green-50 p-3 rounded-lg">
+                  <div class="text-2xl font-bold text-green-600">${data.files_copied}</div>
+                  <div class="text-sm text-green-600">Files Organized</div>
+                </div>
+                <div class="bg-purple-50 p-3 rounded-lg">
+                  <div class="text-2xl font-bold text-purple-600">${data.total_size}</div>
+                  <div class="text-sm text-purple-600">Total Size</div>
+                </div>
+              </div>
+              ${data.empty_folders.length > 0 ? 
+                `<div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p class="text-yellow-800"><strong>Note:</strong> ${data.empty_folders.length} folders are empty and may need manual attention.</p>
+                </div>` : 
+                '<div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg"><p class="text-green-800"><strong>Excellent!</strong> All client folders have documents.</p></div>'
+              }
+            `;
+            resultsDiv.className = 'bg-green-50 border border-green-200 rounded-lg p-4 text-green-800';
+
+            // Show empty folders section if needed
+            if (data.empty_folders.length > 0) {
+              showEmptyFolders(data.empty_folders);
+            }
+
+            // Populate summary table
+            if (data.client_summary) {
+              populateSummaryTable(data.client_summary);
+              summarySection.style.display = 'block';
+            }
+          }
+        }, 1000);
+      })
+      .catch(error => {
+        clearInterval(progressInterval);
+        progressSection.style.display = 'none';
+        resultsSection.style.display = 'block';
+        submitButton.disabled = false;
+        
+        resultsDiv.innerHTML = `
+          <div class="flex items-center">
+            <svg class="h-6 w-6 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+            <span class="font-semibold">Connection Error:</span>
+          </div>
+          <p class="mt-2">${error.message}</p>
+        `;
+        resultsDiv.className = 'bg-red-50 border border-red-200 rounded-lg p-4 text-red-800';
+      });
+    });
+
+    // Show empty folders
+    function showEmptyFolders(emptyFolders) {
+      const emptyFoldersSection = document.getElementById('empty-folders-section');
+      const emptyFoldersList = document.getElementById('empty-folders-list');
+
+      if (emptyFolders.length === 0) {
+        emptyFoldersList.innerHTML = '<p class="text-green-600 font-semibold">All client folders have documents! 🎉</p>';
+      } else {
+        emptyFoldersList.innerHTML = `
+          <div class="mb-4">
+            <p class="text-orange-600 font-semibold mb-3">📋 Found ${emptyFolders.length} empty folders requiring attention:</p>
+            <div class="space-y-2">
+              ${emptyFolders.map(folder => `
+                <div class="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-lg p-3">
+                  <span class="text-gray-700 font-medium">${folder}</span>
+                  <button onclick="selectFolderForManualSearch('${folder}')" class="btn-warning text-sm py-1 px-3">
+                    Manual Search
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+      emptyFoldersSection.style.display = 'block';
+    }
+
+    // Manual search functions
+    function selectFolderForManualSearch(folderName) {
+      selectedFolderForManualSearch = folderName;
+      document.getElementById('selected-folder-name').textContent = folderName;
+      document.getElementById('manual-search-section').style.display = 'block';
+      document.getElementById('manual-search-path').focus();
+    }
+
+    function hideManualSearch() {
+      document.getElementById('manual-search-section').style.display = 'none';
+      selectedFolderForManualSearch = null;
+      document.getElementById('manual-search-path').value = '';
+    }
+
+    function performManualSearch() {
+      const searchPath = document.getElementById('manual-search-path').value.trim();
+      if (!searchPath) {
+        alert('Please enter a search directory path');
+        return;
+      }
+
+      if (!selectedFolderForManualSearch) {
+        alert('No folder selected for manual search');
+        return;
+      }
+
+      const data = {
+        search_path: searchPath,
+        folder: selectedFolderForManualSearch
+      };
+
+      // Show loading state
+      const button = event.target;
+      const originalText = button.innerHTML;
+      button.disabled = true;
+      button.innerHTML = '<div class="loading-spinner mr-2"></div>Searching...';
+
+      fetch('/manual-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(result => {
+        button.disabled = false;
+        button.innerHTML = originalText;
+        
+        if (result.error) {
+          alert('Error: ' + result.message);
+        } else {
+          alert('✅ ' + result.message);
+          hideManualSearch();
+          // Refresh empty folders list
+          if (result.updated_empty_folders) {
+            showEmptyFolders(result.updated_empty_folders);
+          }
+        }
+      })
+      .catch(error => {
+        button.disabled = false;
+        button.innerHTML = originalText;
+        alert('Error: ' + error.message);
+      });
+    }
+
+    // Populate summary table
+    function populateSummaryTable(clientSummary) {
+      const tableBody = document.getElementById('summary-table-body');
+      tableBody.innerHTML = '';
+
+      clientSummary.forEach(client => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50';
+        
+        const statusBadge = client.is_empty ? 
+          '<span class="status-badge status-empty">Empty</span>' : 
+          '<span class="status-badge status-complete">Complete</span>';
+
+        const documentsDisplay = client.documents.length > 0 ? 
+          `<span class="text-xs text-gray-600">${client.documents.slice(0, 2).join(', ')}${client.documents.length > 2 ? ` (+${client.documents.length - 2} more)` : ''}</span>` : 
+          '<span class="text-gray-400 text-xs">No documents</span>';
+
+        const actionButton = client.is_empty ? 
+          `<button onclick="selectFolderForManualSearch('${client.folder_name}')" class="text-blue-600 hover:text-blue-900 text-xs font-medium">Manual Search</button>` : 
+          '<span class="text-green-600 text-xs">✓ Complete</span>';
+
+        row.innerHTML = `
+          <td class="px-4 py-3 text-sm text-gray-900 font-medium">${client.client_name}</td>
+          <td class="px-4 py-3 text-sm text-gray-600">${client.ec_number}</td>
+          <td class="px-4 py-3">${statusBadge}</td>
+          <td class="px-4 py-3 text-sm text-center">${client.files_found}</td>
+          <td class="px-4 py-3 text-sm">${documentsDisplay}</td>
+          <td class="px-4 py-3 text-sm text-center">${actionButton}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Load empty folders on page load
+    window.addEventListener('load', function() {
+      fetch('/get-empty-folders')
+        .then(response => response.json())
+        .then(emptyFolders => {
+          if (emptyFolders.length > 0) {
+            showEmptyFolders(emptyFolders);
+          }
+        })
+        .catch(error => {
+          console.log('No empty folders data available yet');
+        });
+    });
+  </script>
+</body>
+
+</html>

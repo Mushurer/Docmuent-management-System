@@ -1,0 +1,56 @@
+
+{
+  "name": "kyc-document-manager",
+  "version": "1.0.0",
+  "description": "KYC Document Manager Desktop Application",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win",
+    "build-mac": "electron-builder --mac",
+    "build-linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.kycdocmanager.app",
+    "productName": "KYC Document Manager",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron-main.js",
+      "main.py",
+      "templates/**/*",
+      "static/**/*",
+      "balances/**/*",
+      "requirements.txt",
+      "python-portable/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "python-portable",
+        "to": "python-portable"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "icon.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "path": "^0.12.7"
+  }
+}
